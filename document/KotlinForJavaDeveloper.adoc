@@ -2,3 +2,21 @@
 :numbered:
 
 = Kotlin for Java Developer
+
+include::chap01.adoc[]
+
+include::chap02.adoc[]
+
+include::chap03.adoc[]
+
+include::chap04.adoc[]
+
+include::chap05.adoc[]
+
+include::chap06.adoc[]
+
+include::chap07.adoc[]
+
+include::chap08.adoc[]
+
+include::chap09.adoc[]

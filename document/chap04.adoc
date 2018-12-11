@@ -1,0 +1,138 @@
+== 변수
+
+변수는 val(value) 또는 var(variable) 로 정의한다. +
+val 는 불변값을 저장하고, var 는 변수이다.
+
+=== val 로 최상위 상수 정의하기
+
+.Code001.kt
+[source,kotlin]
+----
+package chap04
+
+val value = 1
+// value = 2 // Expecting a top level declaration
+----
+
+Java 로 변환된 소스에서 value 를 살펴보자.
+
+.Code001.kt 의 Java 변환
+[source,java]
+----
+package chap04;
+
+import kotlin.Metadata;
+
+@Metadata(
+   mv = {1, 1, 13},
+   bv = {1, 0, 3},
+   k = 2,
+   d1 = {"\u0000\n\n\u0000\n\u0002\u0010\b\n\u0002\b\u0003\"\u0014\u0010\u0000\u001a\u00020\u0001X\u0086D¢\u0006\b\n\u0000\u001a\u0004\b\u0002\u0010\u0003¨\u0006\u0004"},
+   d2 = {"value", "", "getValue", "()I", "com.haven.kotlin.tmemory.main"}
+)
+public final class Code001Kt {
+   private static final int value = 1;
+
+   public static final int getValue() {
+      return value;
+   }
+}
+----
+
+value 상수가 private final 이고 Getter 만 생성되었음을 볼 수 있다.
+
+=== var 로 최상위 변수 정의하기
+
+.Code002.kt
+[source,kotlin]
+----
+package chap04
+
+var variable = 1
+// variable = 2  // Expecting a top level declaration
+----
+
+주목해 볼 것은 variable 이 최상위 변수임에도 불구하고, 최상위 영역에서 재할당할 수는 없다는 것이다. +
+최상위 영역에서는 초기화만 하는 것이지 재할당할 이유가 사실 없기 때문에다. +
+재할당을 위해서는 함수 안에서 재할당하면 된다. +
+Java 로 변환된 소스에서 variable 를 살펴보자.
+
+.Code002.kt 의 Java 변환
+[source,java]
+----
+package chap04;
+
+import kotlin.Metadata;
+
+@Metadata(
+   mv = {1, 1, 13},
+   bv = {1, 0, 3},
+   k = 2,
+   d1 = {"\u0000\n\n\u0000\n\u0002\u0010\b\n\u0002\b\u0005\"\u001a\u0010\u0000\u001a\u00020\u0001X\u0086\u000e¢\u0006\u000e\n\u0000\u001a\u0004\b\u0002\u0010\u0003\"\u0004\b\u0004\u0010\u0005¨\u0006\u0006"},
+   d2 = {"variable", "", "getVariable", "()I", "setVariable", "(I)V", "com.haven.kotlin.tmemory.main"}
+)
+public final class Code002Kt {
+   private static int variable = 1;
+
+   public static final int getVariable() {
+      return variable;
+   }
+
+   public static final void setVariable(int var0) {
+      variable = var0;
+   }
+}
+----
+
+variable 변수가 private 이고 Getter 와 Setter 이 생성되었음을 볼 수 있다.
+
+=== 같은 패키지에서 촤상위 상수/변수 사용하기
+
+.Code003.kt
+[source,kotlin]
+----
+package chap04
+
+fun main(args: Array<String>) {
+    println(value);
+    println(variable);
+
+    // value = 2; // Val cannot be reassigned
+    variable = 2;
+}
+----
+
+val 로 선언한 상수에는 값을 재할당할 수 없다는 것을 확인할 수 있다.
+
+=== 다른 패키지에서 최상위 상수/변수 사용하기
+
+.Other001.kt
+[source,kotlin]
+----
+package chap04.other
+
+fun main(args: Array<String>) {
+    println(chap04.value)
+    println(chap04.variable)
+}
+----
+
+최상위 함수와 마찬가지로 최상위 상수/변수는 마치 Package 상수/변수인 것처럼 동작하는 것을 확인할 수 있다. +
+매번 Package 명을 타이핑하기 귀찮다면 import 구문을 사용하면 되겠다. +
+최상위 함수와 마찬가지로 import static 으로 사용할 필요도, 사용해서도 안 된다.
+
+.Other002.kt
+[source,kotlin]
+----
+package chap04.other
+
+import chap04.value
+import chap04.variable
+
+fun main(args: Array<String>) {
+    println(value)
+    println(variable)
+}
+----
+
+NOTE: Java 에서는 package 구조가 실제 Directory 구조와 일치해야 하지만 Kotlin 은 제약이 없다. 그럼에도 package 구조와 Directory 구조를 일치시키는 것은 좋은 관습이다.

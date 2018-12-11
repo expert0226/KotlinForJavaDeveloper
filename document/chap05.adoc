@@ -1,0 +1,186 @@
+== 클래스
+
+=== 클래스의 선언
+
+.Person.kt
+[source,kotlin]
+----
+package chap05
+
+class Person(val name: String, var age: Int)
+----
+
+기본적으로 class 는 public final 이다. +
+클래스 생성자의 val 는 private static final 상수와 public static Getter 를 만들어낸다. +
+클래스 생성자의 var 는 private static 변수와 public static Getter/Setter 를 만들어 내다.
+
+.Person.kt 의 Java 변환
+[source,java]
+----
+package chap05;
+
+import kotlin.Metadata;
+import kotlin.jvm.internal.Intrinsics;
+import org.jetbrains.annotations.NotNull;
+
+@Metadata(
+   ...
+)
+public final class Person {
+   @NotNull
+   private final String name;
+   private int age;
+
+   @NotNull
+   public final String getName() {
+      return this.name;
+   }
+
+   public final int getAge() {
+      return this.age;
+   }
+
+   public final void setAge(int var1) {
+      this.age = var1;
+   }
+
+   public Person(@NotNull String name, int age) {
+      Intrinsics.checkParameterIsNotNull(name, "name");
+      super();
+      this.name = name;
+      this.age = age;
+   }
+}
+----
+
+=== 객체(클래스 인스턴스)의 선언
+
+new 키워드를 사용하지 않는다.
+
+.Person.kt
+[source,kotlin]
+----
+package chap05
+
+fun main(args: Array<String>) {
+    val person = Person("Rambo", 27)
+
+    println("성명: $person.name")     // 성명: chap05.Person@49476842.name
+    println("나이: $person.age")      // 나이: chap05.Person@49476842.age
+
+    println("성명: ${person.name}")   // 성명: Rambo
+    println("나이: ${person.age}")    // 나이: 27
+}
+----
+
+위 소스에서 보면 new 연산자 없이 객체를 생성하는 것을 볼 수 있다. +
+또한 문자열 템플릿을 사용할 때 주의할 점을 확인할 수 있다.
+
+$person.name 의 경우 . (참조 연산자) 보다 $ (문자열 템플릿 지정자)가 우선 순위가 높기 때문에 {} 로 감싸주어야 정확한 결과가 나오는 것을 알 수 있다.
+
+=== 생성자 인자 외의 속성 사용하기
+
+.Dog.kt
+[source,kotlin]
+----
+package chap05
+
+class Dog(val name: String, var age: Int) {
+    val species: String
+    get(): String {
+        return "Wolf"
+    }
+
+    var breed: String
+    get() = breed
+    set(breed) {
+        this.breed = breed
+    }
+}
+----
+
+val 속성인 경우 get() 만 존재할 수 있고, 이 때 fun 키워드를 붙이지 않는다. +
+var 속성인 경우 get() / set(...) 이 존재하고, 역시 fun 키워드를 붙이지 않는다.
+
+.Dog.kt 의 Java 변환
+[source,java]
+----
+package chap05;
+
+import kotlin.Metadata;
+import kotlin.jvm.internal.Intrinsics;
+import org.jetbrains.annotations.NotNull;
+
+@Metadata(
+   ...
+
+   d2 = {"Lchap05/Dog;", "", "name", "", "age", "", "(Ljava/lang/String;I)V", "getAge", "()I", "setAge", "(I)V", "breed", "getBreed", "()Ljava/lang/String;", "setBreed", "(Ljava/lang/String;)V", "getName", "species", "getSpecies", "com.haven.kotlin.tmemory.main"}
+)
+public final class Dog {
+   @NotNull
+   private final String name;
+   private int age;
+
+   @NotNull
+   public final String getSpecies() {
+      return "Wolf";
+   }
+
+   @NotNull
+   public final String getBreed() {
+      return this.getBreed();
+   }
+
+   public final void setBreed(@NotNull String breed) {
+      Intrinsics.checkParameterIsNotNull(breed, "breed");
+      this.setBreed(breed);
+   }
+
+   @NotNull
+   public final String getName() {
+      return this.name;
+   }
+
+   public final int getAge() {
+      return this.age;
+   }
+
+   public final void setAge(int var1) {
+      this.age = var1;
+   }
+
+   public Dog(@NotNull String name, int age) {
+      Intrinsics.checkParameterIsNotNull(name, "name");
+      super();
+      this.name = name;
+      this.age = age;
+   }
+}
+----
+
+생성자의 인자로 주었을 때와 같은 규칙을 따른다. +
+생성자의 인자는 자동으로 Getter/Setter 가 만들어지는데 필요한 경우 Override 할 수 있다. + 
+
+=== 생성자의 인자 Getter/Setter Override
+
+생성자의 인자에 대한 Getter/Setter Override 하기 위해서는 Override 하기 원하는 생성자의 인자를 private 으로 선언해야 한다.
+
+.Cat.kt
+[source,kotlin]
+----
+package chap05
+
+class Cat(private val name: String, private var age: Int) {
+    fun getName(): String {
+        return "고양이는 야옹이"
+    }
+
+    fun getAge(): Int {
+        return age;
+    }
+
+    fun setAge(age: Int) {
+        this.age = age;
+    }
+}
+----

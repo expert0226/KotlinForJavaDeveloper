@@ -107,7 +107,7 @@ public class Other {
 }
 ----
 
-=== T-Memory 보고 가실계요.
+=== T-Memory 보고 가실께요.
 
 .Java 개발자 입장
 image::images/chap03/010.png[]
