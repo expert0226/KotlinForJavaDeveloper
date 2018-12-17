@@ -1,0 +1,70 @@
+== 컬렉션 처리 
+
+=== 가변 인자 함수: 인자의 개수가 달라질 수 있는 함수 정의 
+
+vararg 키워드를 사용하면 호출 시 인자 개수가 달라질 수 있는 함수를 정의할 수 있다.
+
+listOf 의 함수 정의를 보면 다음과 같다.
+
+[source,kotlin]
+----
+fun <T> listOf(vararg elements: T): List<T> { ... }
+----
+
+가변 길이 인자는 메소드를 호출할 때 원하는 개수만큼 값을 인자로 넘기면 자바 컴파일러가 #배열# 에 그 값들을 넣어주는 기능이다. 코틀린의 가변 길이 인자도 자바와 비슷하다. 다만 문법이 조금 다른다. 타입 뒤에 ...를 붙이는 대신 코틀린에서는 파라미터 앞에 #vararg# 변경자를 붙인다.
+
+이미 배열에 들어있는 원소를 가변 길이 인자로 넘길 때도 코틀린과 자바 구문이 다르다. 자바에서는 배열을 그냥 넘기면 되지만 코틀린에서는 #스프레드(Spread) 연산자# 가 그런 작업을 해준다. 전달하려는 배열 앞에 * 붙이기만 하면 된다.
+
+[source,kotlin]
+----
+package chap11
+
+fun main(args: Array<String>) {
+    val array = arrayOf("a", "one", "할룽")
+
+    val list = listOf("first", *array)
+
+    println("args: $list")
+}
+----
+
+
+이 예제는 스프레드 연산자를 통하면 배열에 들어있는 값과 다른 여러 값을 함께 써서 함수를 호출할 수 있음을 보여준다. 이런 기능은 자바에서는 사용할 수 없다.
+
+=== 값의 쌍 다루기: 중위 호출과 구조 분해 선언 
+
+[source,kotlin]
+----
+package chap11
+
+val map01 = mapOf(1 to "one", 7 to "seven", 53 to "fifty-three")
+
+val map02 = mapOf(1.to("one"), 7.to("seven"), 53.to("fifty-three"))
+
+val map03 = mapOf(Pair(1, "one"), Pair(7, "seven"), Pair(53, "fifty-three"))
+----
+
+중위(Infix) 함수 호출 구문을 사용하면 인자가 하나뿐인 메소드를 간편하게 호출할 수 있다.
+
+중위 호출 시에는 #수신 객체# 와 #유일한 메소드 인자# 사이에 메서드 이름을 넣는다(이때 객체, 메소드 이름, 유일한 인자 사이에는 공백이 들어가야 한다).
+
+#인자가 하나 뿐인 메소드# 에 중위 호출을 사용할 수 있다(일반 메소드이건 확장 메 함수이건 상관 없다).  함수(메소드)를 중위 호출에 사용하게 허용하고 싶은면 #infix# 변경자를 함수(메소드) 선언 앞에 추가해야 한다. 아래는 to 의 정의이다.
+
+[source,kotlin]
+----
+public infix fun <A, B> A.to(that: B): Pair<A, B> = Pair(this, that)
+----
+
+Pair 는 코틀린 표준 라이브러리 클래스로, 그 이름대로 두 원소로 이뤄진 순서쌍을 표현한다.
+
+Pair 의 내용으로 두 변수를 즉시 초기화할 수 있다.
+
+[source,kotlin]
+----
+val (number, name) = 1 to "one"
+----
+
+WARNING: Destructuring declaration are only allowed for local variables/values
+
+이런 기능을 구조 분해 선언이라고 부른다. +
+구조 분해 선언(Destructuring Declaration)을 사용하면 복합적인 값을 분해해서 여러 변수에 나눠 남들 수 있다.

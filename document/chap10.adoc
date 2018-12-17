@@ -1,0 +1,236 @@
+== 확장 함수와 확장 프로퍼티
+
+=== 확장 함수
+
+확장 함수는 어떤 클래스의 멤버 메소드인 것처럼 호출할 수 있지만 그 클래스의 밖에서 선언된 함수다. +
+확장 함수를 만들려면 추가하려는 함수 이름 앞에 그 함수가 확장할 클래스의 이름을 덧붙이기만 하면 된다. +
+클래스의 이름을 #수신 객체 타입(Receiver Type)# 이라 부르며, 확장 함수가 호출되는 대상이 되는 값(객체)을 #수신 객체(Receiver Object)# 라고 부른다.
+
+.Code001.kt
+[source,kotlin]
+----
+package chap10
+
+fun String.lastChar(): Char = this.get(this.length - 1)
+----
+
+.자바로 변환된 코틀린 코드
+[source,java]
+----
+package chap10;
+
+import kotlin.Metadata;
+import kotlin.jvm.internal.Intrinsics;
+import org.jetbrains.annotations.NotNull;
+
+@Metadata(
+   ...
+)
+public final class Code001Kt {
+   public static final char lastChar(@NotNull String $receiver) {
+      Intrinsics.checkParameterIsNotNull($receiver, "receiver$0");
+      return $receiver.charAt($receiver.length() - 1);
+   }
+}
+----
+
+변환된 코드에서 확인할 수 있듯이 #확장 함수# 는 receiver 가 있는 #최상위 함수# 로 변환된다. +
+따라서 다른 패키지에서 확장 함수를 호출하기 위해서는 import 가 필요하다.
+
+.Code001Driver.kt
+[source,kotlin]
+----
+package chap10.other
+
+import chap10.lastChar
+
+fun main(args: Array<String>) {
+    println("love me!".lastChar())
+}
+----
+
+일반 메서드의 본문에서 this 를 사용할 때와 마찬가지로 확장 함수 본문에도 this 를 쓸 수 있다. 그리고  일반 메소드와 마찬가지로 확장 함수 본문에서도 this 를 생략할 수 있다.
+
+확장 함수가 캡슐화를 깨지는 않는다. 확장 함수 안에서는 클래스의 내부에서만 사용할 수 있는 비공개(private) 멤버나 보호된(protected) 멤버를 사용할 수 없다.
+
+호출하는 쪽에서는 확장 함수와 멤버 메소드를 구분할 수 없다.
+
+=== 임포트와 확장 함수
+
+확장 함수를 사용하기 위해서는 그 함수를 다른 클래스나 함수와 마찬가지로 임포트해야만 한다. + 
+as 키워드를 사용하면 임포트한 함수를 다른 이름으로 부를 수 있다.
+
+.Code002Driver.kt
+[source,kotlin]
+----
+package chap10.other
+
+import chap10.lastChar as lc
+
+fun main(args: Array<String>) {
+    println("love me!".lc())
+}
+----
+
+확장 함수는 코틀린 문법 상 반드시 짧은 이름을 써야 한다. 따라서 임포트할 때 이름을 바꾸는 것이 확장 함수의 이름 충돌을 해결하는 유일한 방법이다.
+
+내부적으로 확장 함수는 수신 객체를 첫 번째 인자로 받는 정적 메소드다. 
+
+자바에서 확장 함수는 다른 최상위 함수와 마찬가지로 확장 함수가 들어있는 자바 클래스 이름도 확장 함수가 들어있는 파일 이름에 따라 결정된다.
+
+=== 확장 함수와 제네릭
+
+.Code003.kt
+[source,kotlin]
+----
+package chap10
+
+import java.lang.StringBuilder
+
+fun <T> Collection<T>.joinToString (
+    separator: String = ", ",
+    prefix: String = "",
+    postfix: String = ""
+): String {
+    val result = StringBuilder(prefix)
+
+    for((index, element) in this.withIndex()) {
+        if (index > 0) result.append(separator)
+        result.append(element)
+    }
+
+    result.append(postfix)
+    return result.toString()
+}
+
+fun main(args: Array<String>) {
+    val list = listOf(1, 2, 3)
+    println(list.joinToString(" "))
+}
+----
+
+확장 함수는 단지 정적 메소드 호출에 대한 문법적인 편의(Syntatic Sugar)일 뿐이다. 그래서 클래스가 아닌 더 구체적인 수신 객체 타입으로 지정할 수도 있다.
+
+.Code004.kt
+[source,kotlin]
+----
+package chap10
+
+fun Collection<String>.join(
+    separator: String = ", ",
+    prefix: String = "",
+    postfix: String = ""
+) = joinToString(separator, prefix, postfix) // this.joinToString(separator, prefix, postfix)
+
+fun main(args: Array<String>) {
+    println(listOf("One", "two", "eight").join(" "))
+}
+----
+
+=== 확장 함수는 오버라이드할 수 없다.
+
+확장 함수가 정적 메소드와 같은 특징을 가지므로, #확장 함수를 하위 클래스에서 오버라이드할 수는 없다#.
+
+TIP: 실행 시점에 객체 타입에 따라 동적으로 호출될 대상 메소드를 결정한느 방식을 #동적 디스패치(Dynamic Dispatch)# 라고 한다. 반면 컴파일 시점에 알려진 변수 타입에 따라 정해진 메소드를 호출하는 방식은 #정적 디스패치(Static Dispatch)# 라고 부른다.
+
+이름과 파라미터가 완전히 같은 확장 함수를 기반 클래스와 하위 클래스에 대해 정의해도 실제로는 확장 함수를 호출할 때 수신 객체로 지정한 변수의 #정적 타입# 에 의해 어떤 확장 함수가 호출될지 결정되지, 그 변수에 저장된 객체의 동적인 타입에 의해 확장 함수가 결죙되지 않는다.+
+자바도 호출할 정적 함수를 같은 방식으로 정적으로 결정한다.
+
+#확장 함수는 정적으로 결정된다.#
+
+NOTE: 어떤 클래스를 확장한 함수와 그 클래스의 멤버 함수의 일므과 시니처가 같다면 확장 함수가 아니라 멤버 함수가 호출된다(멤버 함후의 우선 순위가 더 높다).
+
+=== 확장 프로퍼티
+
+확장 프로퍼터를 사용하면 기존 클래스 객체에 대한 프로퍼티 형식의 구문으로 사용할 수 있는 API 를 추가할 수 있다. 프로퍼티라는 이름으로 불리기는 하지만 상태를 저장할 적절한 방법이 없기 때문에(기존 클래스의 인스턴스 객체에 필드를 추가할 방법은 없다) 실제로 #확장 프로퍼티는 아무 상태도 가실 수 없다(기반 field 가 없다)#. 하지만 프로퍼티 문법으로 더 짧게 코드를 작성할 수 있어서 편한 경우가 있다.
+
+.Code005.kt
+[source,kotlin]
+----
+package chap10
+
+val String.firstChar: Char
+    get() = this[0]
+
+fun main(args: Array<String>) {
+    println("kiss me".firstChar)
+}
+----
+
+.자바로 변환된 코틀린 코드
+[source,java]
+----
+package chap10;
+
+import kotlin.Metadata;
+import kotlin.jvm.internal.Intrinsics;
+import org.jetbrains.annotations.NotNull;
+
+@Metadata(
+   ...
+)
+public final class Code005Kt {
+   public static final char getFirstChar(@NotNull String $receiver) {
+      Intrinsics.checkParameterIsNotNull($receiver, "receiver$0");
+      return $receiver.charAt(0);
+   }
+
+   public static final void main(@NotNull String[] args) {
+      Intrinsics.checkParameterIsNotNull(args, "args");
+      char var1 = getFirstChar("kiss me");
+      System.out.println(var1);
+   }
+}
+----
+
+#확장 프로퍼티는 기반 Field 가 없는 수신 객체가 있는 정적 Getter/Setter 를 만들어 낸다#.
+
+확장 함수의 경우와 마찬가지로 확장 프로퍼티도 일반적인 프로퍼티와 같은데, 단지 수신 객체 클래스가 추가됐을 뿐아다. +
+#뒷받침하는 필드가 없어서 기본 게터 구현을 제공할 수 없으므로 최소한 게터는 꼭 정의를 해야 한다.# 마찬가지로 초기화 코드에서 계산한 값을 담을 장소가 전혀 없으므로 #초기화 코드도 쓸 수 없다#.
+
+.Code006.kt
+[source,kotlin]
+----
+package chap10
+
+import java.lang.StringBuilder
+
+val String.fc: Char
+get() = this[0]
+
+var StringBuilder.lc: Char
+get() = get(this.length - 1)
+set(ch) = this.setCharAt(length - 1, ch)
+----
+
+.자바로 변환된 코틀린 코드
+[source,java]
+----
+package chap10;
+
+import kotlin.Metadata;
+import kotlin.jvm.internal.Intrinsics;
+import org.jetbrains.annotations.NotNull;
+
+@Metadata(
+   ...
+)
+public final class Code006Kt {
+   public static final char getFc(@NotNull String $receiver) {
+      Intrinsics.checkParameterIsNotNull($receiver, "receiver$0");
+      return $receiver.charAt(0);
+   }
+
+   public static final char getLc(@NotNull StringBuilder $receiver) {
+      Intrinsics.checkParameterIsNotNull($receiver, "receiver$0");
+      return $receiver.charAt($receiver.length() - 1);
+   }
+
+   public static final void setLc(@NotNull StringBuilder $receiver, char ch) {
+      Intrinsics.checkParameterIsNotNull($receiver, "receiver$0");
+      $receiver.setCharAt($receiver.length() - 1, ch);
+   }
+}
+----
+
+자바에서 확장 프로퍼티를 사용하고 싶다면 항상 Code006Kt.getFc("Java") 처럼 게터나 세터를 명시적으로 호출해야 한다.

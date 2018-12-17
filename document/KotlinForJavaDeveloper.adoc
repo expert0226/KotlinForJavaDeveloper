@@ -20,3 +20,9 @@ include::chap07.adoc[]
 include::chap08.adoc[]
 
 include::chap09.adoc[]
+
+include::chap10.adoc[]
+
+include::chap11.adoc[]
+
+include::chap12.adoc[]

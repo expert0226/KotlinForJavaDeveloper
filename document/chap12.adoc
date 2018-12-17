@@ -1,0 +1,55 @@
+== 로컬 함수 
+
+코틀린에서는 함수에서 추출한 함수를 원 함수 내부에 중첩시킬 수 있다.
+
+.Code001.kt
+[soruce,kotlin]
+----
+package chap12
+
+fun outer() {
+    fun inner(arg: String) {
+        println("Hello, $arg")
+    }
+
+    inner("미야야키 사쿠라")
+    inner("타카하시 주리")
+    inner("혼다 히토미")
+}
+
+fun main(args: Array<String>) {
+    outer()
+}
+----
+
+.자바로 변환된 코틀린 코드
+[source,java]
+----
+package chap12;
+
+import kotlin.Metadata;
+import kotlin.jvm.internal.Intrinsics;
+import org.jetbrains.annotations.NotNull;
+
+@Metadata(
+   ...
+)
+public final class Code001Kt {
+   public static final void outer() {
+      <undefinedtype> inner$ = null.INSTANCE;
+      inner$.invoke("미야야키 사쿠라");
+      inner$.invoke("타카하시 주리");
+      inner$.invoke("혼다 히토미");
+   }
+
+   public static final void main(@NotNull String[] args) {
+      Intrinsics.checkParameterIsNotNull(args, "args");
+      outer();
+   }
+}
+----
+
+로컬 함수는 자신이 속한 바깥 함수의 모든 파라미터와 변수를 사용할 수 있다. +
+소스를 살펴보면 로컬 함수는 내부 객체의 익명 인스턴스임을 짐작할 수 있다. +
+이때 내부 객체는 ASM 임도 짐작할 수 있다. +
+결론, 로컬 함수는 람다!!!
